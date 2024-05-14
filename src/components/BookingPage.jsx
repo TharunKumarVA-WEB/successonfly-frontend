@@ -1,5 +1,4 @@
 
-
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -7,25 +6,31 @@ function BookingPage() {
   const [numAdults, setNumAdults] = useState(1);
   const [numChildren, setNumChildren] = useState(0);
   const [selectedClass, setSelectedClass] = useState("Economy");
+  const [email, setEmail] = useState("");
+  const [bookingMessage, setBookingMessage] = useState(''); // State for booking confirmation message
   const navigate = useNavigate();
   const location = useLocation();
   const { flight } = location.state;
 
   const defaultDepartureDate = new Date().toISOString().split('T')[0];
   const defaultArrivalDate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  
+
   const [departureDate, setDepartureDate] = useState(defaultDepartureDate);
   const [arrivalDate, setArrivalDate] = useState(defaultArrivalDate);
 
+  
   const handleConfirmBooking = async () => {
-    // Check if the user is logged in
     const isLoggedIn = localStorage.getItem('loggedIn');
     if (!isLoggedIn) {
-      // If not logged in, navigate to the sign-in page
       navigate('/signin');
       return;
     }
-
+  
+    if (!email) {
+      alert('Please enter your email.');
+      return;
+    }
+  
     try {
       const response = await fetch('https://successonfly-backend-1.onrender.com/api/book-flight', {
         method: 'POST',
@@ -38,25 +43,31 @@ function BookingPage() {
           numAdults,
           numChildren,
           departureDate,
+          userEmail: email, // Ensure userEmail is sent correctly
         }),
       });
-
+  
       if (response.ok) {
         const result = await response.json();
-        alert(`Booking confirmed! Booking ID: ${result.bookedFlight._id}`);
-        navigate('/'); // Redirect the user to the previous page after confirming the booking
+        setBookingMessage(`Booking confirmed! Booking ID: ${result.bookedFlight._id}`);
       } else {
         console.error('Error booking flight:', response.statusText);
-        alert('Failed to confirm booking. Please try again.');
+        setBookingMessage('Failed to confirm booking. Please try again.');
       }
     } catch (error) {
       console.error('Error booking flight:', error);
-      alert('Failed to confirm booking. Please try again.');
+      setBookingMessage('Failed to confirm booking. Please try again.');
     }
   };
+  
+
+
+
+
 
   return (
     <div className="container mt-4">
+      {bookingMessage && <div className="alert alert-success">{bookingMessage}</div>}
       <h2 className="mb-4">Booking Details</h2>
       <div className="card mb-3">
         <div className="card-body">
@@ -82,6 +93,8 @@ function BookingPage() {
             <option value="Economy">Economy</option>
             <option value="Business">Business</option>
           </select>
+          <label htmlFor="email" className="form-label">Email:</label>
+          <input type="email" id="email" className="form-control mb-3" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button onClick={handleConfirmBooking} className="btn btn-primary">Confirm Booking</button>
         </div>
       </div>
@@ -90,6 +103,3 @@ function BookingPage() {
 }
 
 export default BookingPage;
-
-
-

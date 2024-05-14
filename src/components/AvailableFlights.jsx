@@ -2,19 +2,27 @@
 
 import React, { useState } from 'react';
 import { Card, Button, Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import loadingGif from '../assets/Loading.gif';
 
-function AvailableFlights({ availableFlights, isLoggedIn, userEmail, startDate }) {
+function AvailableFlights({ availableFlights, isLoggedIn, startDate }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingMessage, setBookingMessage] = useState('');
+  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
 
   const handleBookFlight = async (flight, className) => {
     setIsLoading(true);
     setError(null);
 
     if (!isLoggedIn) {
-      setError('Please login to book a flight.');
+      navigate('/signin');
+      return;
+    }
+
+    if (!email) {
+      alert('Please provide your email.');
       setIsLoading(false);
       return;
     }
@@ -31,7 +39,7 @@ function AvailableFlights({ availableFlights, isLoggedIn, userEmail, startDate }
           numAdults: 1,
           numChildren: 0,
           departureDate: startDate,
-          userEmail: userEmail, // Pass userEmail to the backend
+          userEmail: email,
         }),
       });
 
@@ -51,22 +59,21 @@ function AvailableFlights({ availableFlights, isLoggedIn, userEmail, startDate }
 
   return (
     <div className="container mt-4">
+      {bookingMessage && <p>{bookingMessage}</p>}
+      <div className="mb-4">
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          className="form-control mb-3"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
       {availableFlights.map((flight) => (
         <div key={flight._id} className="mb-4">
           <Card>
             <Card.Body>
-              <Card.Title>{flight.airline}</Card.Title>
-              <strong>Flight Number:</strong> {flight.flight_number}
-              <div className="d-flex justify-content-between mt-2">
-                <div className='row'>
-                  <p className="card-text">Departure: {flight.departure.date_time}</p>
-                  <p className="card-text">From: {flight.departure.location}</p>
-                </div>
-                <div className='row'>
-                  <p className="card-text">Arrival: {flight.arrival.date_time}</p>
-                  <p className="card-text">To: {flight.arrival.location}</p>
-                </div>
-              </div>
               <Table responsive>
                 <thead>
                   <tr>
@@ -93,7 +100,6 @@ function AvailableFlights({ availableFlights, isLoggedIn, userEmail, startDate }
           </Card>
         </div>
       ))}
-      {bookingMessage && <p>{bookingMessage}</p>}
       {isLoading && (
         <div className="d-flex justify-content-center align-items-center">
           <img src={loadingGif} alt="Loading" className="loading-gif" />

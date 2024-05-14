@@ -1,12 +1,10 @@
 
-//pp.jsx
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import SignIn from './components/SignIn'; 
 import SignUp from './components/SignUp';
-import BookingForm from './components/BookingForm';
+import BookingForm from './components/Bookingform';
 import Footer from './components/Footer';
 import BookingPage from './components/BookingPage';
 import FlightsDefault from "./components/DedaultFlights";
@@ -50,9 +48,10 @@ function App() {
         <div>
           <Header loggedIn={loggedIn} setLoggedIn={setLoggedIn} userEmail={userEmail} />
           <Routes>
+           <Route path="/" element={<BookingForm handleBookNow={handleBookNow} setStartDate={setStartDate} setEndDate={setEndDate} />} />
             <Route path="/signin" element={<SignIn setLoggedIn={setLoggedIn} setUserEmail={setUserEmail} />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/" element={<BookingForm handleBookNow={handleBookNow} setStartDate={setStartDate} setEndDate={setEndDate} />} />
+            
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/searchflights" element={<AvailableFlights availableFlights={availableFlights} isLoggedIn={loggedIn} />} />
             <Route path="/search-results" element={<SearchResults startDate={startDate} endDate={endDate} loggedIn={loggedIn} />} />

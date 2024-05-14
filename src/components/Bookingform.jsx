@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import AvailableFlights from "./AvailableFlights";
@@ -23,7 +22,6 @@ function BookingForm() {
   const [availableFlights, setAvailableFlights] = useState([]);
   const { updateSearchResults } = useSearchContext();
   const navigate = useNavigate();
-
 
   // Auto-complete suggestions
   const [autoCompleteSuggestions, setAutoCompleteSuggestions] = useState([]);
@@ -58,24 +56,15 @@ function BookingForm() {
     setSelectedClass(event.target.value);
   };
 
-
-
-
   const handleStartDateChange = (e) => {
-    const formattedDate = e.target.value; // This should be in the format "YYYY-MM-DD"
-    console.log("Start Date:", formattedDate);
-    setStartDate(formattedDate.toLocaleString()); // Corrected function name
+    const formattedDate = e.target.value;
+    setStartDate(formattedDate);
   };
   
   const handleEndDateChange = (e) => {
-    const formattedDate = e.target.value; // This should be in the format "YYYY-MM-DD"
-    console.log("End Date:", formattedDate);
-    setEndDate(formattedDate.toLocaleString()); // Corrected function name
+    const formattedDate = e.target.value;
+    setEndDate(formattedDate);
   };
-  
-
-  //setStartDate(startDate.toLocaleSTring())
-  
 
   const handleToggleFlyDirection = () => {
     const temp = startLocation;
@@ -116,6 +105,14 @@ function BookingForm() {
       if (outboundResponse.ok) {
         const outboundResult = await outboundResponse.json();
         const outboundFlights = outboundResult.availableFlights;
+
+        if (outboundFlights.length === 0) {
+          setSearched(true);
+          setAvailableFlights([]);
+          setLoading(false);
+          alert('No flights available for the selected criteria.');
+          return;
+        }
 
         // Fetch return flights if flightType is 'return' and there's a return date
         if (flightType === 'return' && endDate) {
@@ -270,6 +267,7 @@ function BookingForm() {
                   onChange={handleStartDateChange}
                   required
                   className="form-control"
+                  min={new Date().toISOString().split('T')[0]} // Setting min to current date
                 />
               </label>
             </div>
@@ -283,6 +281,7 @@ function BookingForm() {
                   onChange={handleEndDateChange}
                   required
                   className="form-control"
+                  min={new Date().toISOString().split('T')[0]} // Setting min to current date
                   disabled={flightType === "oneway"}
                 />
               </label>
@@ -372,16 +371,6 @@ function BookingForm() {
         </form>
       </div>
 
-      {/* {searched && availableFlights.length > 0 && (
-        <AvailableFlights 
-          availableFlights={availableFlights} 
-          startDate={startDate} 
-          endDate={endDate} 
-        />
-      )} */}
-      
-
-      
       {searched && availableFlights.length > 0 && (
         <AvailableFlights 
           availableFlights={availableFlights} 
@@ -389,16 +378,9 @@ function BookingForm() {
           endDate={endDate} 
         />
       )}
-
-
-
-      
-
-      {searched && availableFlights.length === 0 && (
-        <p>No Flights available for the selected criteria.</p>
-      )}
     </div>
   );
 }
 
 export default BookingForm;
+
